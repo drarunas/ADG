@@ -1,0 +1,58 @@
+{
+    "manifest_version": 3,
+    "name": "ejprf",
+    "version": "0.1",
+    "description": "A bridge between Reviewer Finder and eJP for editors across Nature Portfolio. Find an assign reviewers on eJP using SN Reviewer Finder.",
+    
+    "content_scripts": [
+        {
+            "matches": [
+                "https://mts-ncomms.nature.com/*",
+                "https://mts-nathumbehav.nature.com/*",
+                "https://mts-commspsychol.nature.com/*",
+                "https://mts-nature.nature.com/*"
+
+            ],
+            "js": [
+                "jquery.js",
+                "helper_functions.js",
+                "bootstrap.min.js",
+                "contentMTS.js",
+                "MSDetails.js"
+            ],
+            "css": [
+                "custom.css",
+                "bs.css"
+            ]
+        },
+        {
+            "matches": [
+                "https://reviewerfinder.nature.com/*"
+            ],
+            "js": [
+                "jquery.js",
+                "contentReviewerFinder.js",
+                "helper_functions.js"
+            ],
+            "css": [
+                "customRF.css"
+            ]
+        }
+    ],
+
+    "permissions": [
+        "tabs",
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://reviewerfinder.nature.com/*",
+        "https://mts-ncomms.nature.com/*",
+        "https://www.googletagmanager.com/*",
+        "https://www.google-analytics.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
+}

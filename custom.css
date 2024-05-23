@@ -1,0 +1,410 @@
+/* BODY * {
+    font-size: 16px !important;
+    font-weight: normal !important;
+    font-family: "Roboto", sans-serif !important;
+}
+
+.folder_table   {
+    min-width: 100% !important;
+}
+
+body > table:nth-of-type(2) 
+ {
+    width: 80% !important;
+}
+ */
+
+
+
+.pcheck {
+    width: 15px !important;
+    height: 15px !important; 
+}
+
+
+
+.popupWindow {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #e3e3e3;
+    padding: 15px;
+    /* Adjusted to account for inner content padding */
+    border-radius: 5px;
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    width: 80%;
+    /* Adjust width as needed */
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Prevent the main container from scrolling */
+}
+
+/* Scrollable Content Area */
+.popupContent {
+    overflow-y: auto;
+    /* Enable vertical scrolling for the content */
+    margin-top: 30px;
+    /* Space for the close button */
+}
+
+/* Close Button */
+.closeButton {
+    position: absolute;
+    padding: 10px;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform:8 translateX(-50%);
+    z-index:  5  10000;
+    background: rgb(255, 255, 255);
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    
+    max-height: 50px;
+    box-sizing: border-box;
+    align-items: center;
+
+}
+
+#searchInput {
+    width: 170px;
+    max-width: 400px;
+    height: 100%;
+    margin-right: 5px;
+    padding: 10px;
+}
+
+.topBtn {
+    max-height: 40px;
+    max-width: 150px;
+    min-width: 80px; /* Adjust as needed to ensure text fits */
+    padding: 10px;
+    margin: 5px;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+}
+
+@media (max-width: 600px) {
+    .topBtn {
+        padding: 2px;
+        font-size: 10px; /* Adjust font size for smaller screens */
+    }
+}
+
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    /* Lighter border for the whole spinner */
+    border-top: 4px solid #3498db;
+    /* Typically a darker or more vibrant color for the animated part */
+    border-radius: 50%;
+    /* This ensures the spinner is circular */
+    width: 15px;
+    /* Width of the spinner */
+    height: 15px;
+    /* Height of the spinner, equal to width for a circle */
+    animation: spin 2s linear infinite;
+    /* Adjust animation as needed */
+    display: inline-block;
+    /* Adjust display as needed, depending on layout */
+}
+
+.top-bar .spinner {
+    vertical-align: middle;
+    flex: 0 0 auto;
+    /* Prevents the spinner from growing or shrinking */
+
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#homeBtn,
+.topButtons {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    /* Adjust size as needed */
+    margin-right: 2px;
+}
+
+
+
+.firstLineDiv {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reviewerFinderPopup .popupHeader {
+    display: flex;
+    /* Enables flexbox layout */
+    align-items: center;
+    /* Vertically centers the title and button */
+    justify-content: space-between;
+    /* Spaces title and button */
+}
+
+.reviewerFinderPopup .popupTitle {
+    margin: 0;
+    /* Removes default margin */
+    flex-grow: 1;
+    /* Allows the title to take up available space */
+}
+
+.reviewerFinderPopup .popupCloseButton {
+    margin-left: 20px;
+    /* Adds some space between the title and the button */
+    cursor: pointer;
+    /* Changes cursor to pointer on hover */
+}
+
+ul {
+    list-style-type: none;
+    /* Examples: disc, circle, square, none */
+}
+
+.eJPResults {
+    list-style-type: none;
+    /* Removes default list bullets */
+    padding-left: 0;
+    /* Removes default padding */
+    margin-top: 10px;
+    /* Adds some space above the list */
+}
+
+.eJPResults li {
+    padding: 5px;
+    /* Adds padding inside each list item */
+    margin-bottom: 10px;
+    /* Adds space between list items */
+    border-radius: 5px;
+    /* Rounds the corners of the list items */
+    display: flex;
+    /* Enables flexbox layout */
+    align-items: center;
+    /* Centers items vertically */
+    font-weight: normal;
+}
+
+
+
+.matchingLi {
+    background-color: #f4ecec;
+    border: 0px solid #bdbbb8;
+    padding: 2px;
+    /* Add some padding inside */
+    border-radius: 5px;
+    /* Optionally round the corners */
+    font-weight: normal;
+}
+
+
+
+.dot-spinner {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 20px;
+    /* Reduced height */
+}
+
+.dot-spinner div {
+    position: absolute;
+    top: 8px;
+    /* Adjusted to center the dots vertically */
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: rgb(188, 188, 188);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.dot-spinner div:nth-child(1) {
+    left: 8px;
+    animation: dot-spinner1 0.6s infinite;
+}
+
+.dot-spinner div:nth-child(2) {
+    left: 8px;
+    animation: dot-spinner2 0.6s infinite;
+}
+
+.dot-spinner div:nth-child(3) {
+    left: 32px;
+    animation: dot-spinner2 0.6s infinite;
+}
+
+.dot-spinner div:nth-child(4) {
+    left: 56px;
+    animation: dot-spinner3 0.6s infinite;
+}
+
+@keyframes dot-spinner1 {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes dot-spinner3 {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes dot-spinner2 {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(24px, 0);
+    }
+}
+
+
+
+
+/* Overlay styles */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.733);
+    /* Semi-transparent black background */
+    z-index: 1000;
+    /* Ensure it's above other content */
+}
+
+/* Loader div styles */
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0px;
+    height: 0px;
+    border-radius: 100%;
+    opacity: 0;
+    border: 5px solid rgb(255, 241, 252);
+    animation: anim 4s infinite linear;
+}
+
+/* Loader animation */
+@keyframes anim {
+    0% {
+        opacity: 0.0;
+        width: 0vmin;
+        height: 0vmin;
+    }
+
+    10% {
+        opacity: 0.2;
+    }
+
+    100% {
+        opacity: 0.0;
+        width: 100vmin;
+        height: 100vmin;
+    }
+}
+
+/* Animation delay for each loader div */
+.loader:nth-child(1) {
+    animation-delay: 200ms;
+}
+
+.loader:nth-child(2) {
+    animation-delay: 400ms;
+}
+
+.loader:nth-child(3) {
+    animation-delay: 600ms;
+}
+
+.loader:nth-child(4) {
+    animation-delay: 800ms;
+}
+
+.loader:nth-child(5) {
+    animation-delay: 1000ms;
+}
+
+.loader:nth-child(6) {
+    animation-delay: 1200ms;
+}
+
+.loader:nth-child(7) {
+    animation-delay: 1400ms;
+}
+
+.loader:nth-child(8) {
+    animation-delay: 1600ms;
+}
+
+.loader:nth-child(9) {
+    animation-delay: 1800ms;
+}
+
+
+
+
+
+
+@keyframes blinkBoxShadow {
+
+    0%,
+    100% {
+        box-shadow: none;
+    }
+
+    50% {
+        box-shadow: 0 0 8px 3px rgb(217, 148, 160);
+
+    }
+}
+
+.blink {
+    animation-name: blinkBoxShadow;
+    animation-duration: 0.6s;
+    /* Apply ease-in-out to make the transition smoother */
+    animation-timing-function: ease-in-out;
+    /* Ensure that the animation count is set in JavaScript */
+    animation-iteration-count: 10;
+    /* This will be controlled by JavaScript */
+}

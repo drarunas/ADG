@@ -1,0 +1,114 @@
+/* Buttons and text inputs*/
+input {
+    background-color: #ececec;
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    border-radius: 3px; /* Adjust the border radius for a less square shape */
+    padding: 5px 5x; /* Adjust the padding for better button appearance */
+    cursor: pointer; /* Add cursor pointer to indicate interactivity */
+    border-width: 1px;
+}
+
+input[type="button"] {
+    background-color: antiquewhite;
+    font-family: "Roboto", sans-serif;
+    font-size: 12px;
+    border-radius: 5px; /* Adjust the border radius for a less square shape */
+    padding: 8px 12px; /* Adjust the padding for better button appearance */
+    cursor: pointer; /* Add cursor pointer to indicate interactivity */
+    margin: 2px;
+    border: none;
+}
+button {
+    font-size: 14px; /* Adjust the font size as needed */
+    border-radius: 5px; /* Adjust the border radius for a less square shape */
+    padding: 8px 2px; /* Adjust the padding for better button appearance */
+    margin: 5px;
+    cursor: pointer; /* Add cursor pointer to indicate interactivity */
+    border: none; /* Remove default button border */
+}
+
+.assign-reviewer-btn {
+    font-family: "Roboto", sans-serif;
+    font-size: 16px; /* Adjust the font size as needed */
+    border-radius: 5px; /* Adjust the border radius for a less square shape */
+    padding: 8px 12px; /* Adjust the padding for better button appearance */
+    cursor: pointer; /* Add cursor pointer to indicate interactivity */
+    border: none; /* Remove default button border */
+    background-color: antiquewhite;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #09f;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.dot-spinner {
+    display: inline-block;
+    position: relative;
+    width: 40px; /* Reduced width */
+    height: 15px; /* Reduced height */
+  }
+  .dot-spinner div {
+    position: absolute;
+    top: 6px; /* Adjusted to center the dots vertically in the new height */
+    width: 6px; /* Reduced dot size for proportionality */
+    height: 6px; /* Reduced dot size for proportionality */
+    border-radius: 50%;
+    background: rgb(100, 132, 147);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  .dot-spinner div:nth-child(1) {
+    left: 4px;
+    animation: dot-spinner1 0.6s infinite;
+  }
+  .dot-spinner div:nth-child(2) {
+    left: 4px;
+    animation: dot-spinner2 0.6s infinite;
+  }
+  .dot-spinner div:nth-child(3) {
+    left: 16px; /* Adjusted for new width */
+    animation: dot-spinner2 0.6s infinite;
+  }
+  .dot-spinner div:nth-child(4) {
+    left: 28px; /* Adjusted for new width */
+    animation: dot-spinner3 0.6s infinite;
+  }
+  @keyframes dot-spinner1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes dot-spinner3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  @keyframes dot-spinner2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(12px, 0); /* Adjusted translation for reduced width */
+    }
+  }
+  
