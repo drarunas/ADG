@@ -59,74 +59,6 @@ async function assignReviewer(reviewerId, jId, msId, msRevNo, msIdKey, currentSt
 }
 
 // when RF button clicked -> reviewerFinderPopup reviewerFinder
-function initiateRevFinding() {
-    const msDetailsRow = document.querySelector(
-        "#ms_details_row_author_information"
-    );
-    if (!msDetailsRow) {
-        console.error("The table row with author information was not found.");
-        return;
-    }
-    const table = msDetailsRow.closest("table"); // Find the closest parent table
-
-    // Function to find sibling TD text based on TH text content
-    const findDataByText = (headerText) => {
-        const th = Array.from(table.querySelectorAll("th")).find((th) =>
-            th.textContent.includes(headerText)
-        );
-        return th ? th.nextElementSibling.textContent : "Not found";
-    };
-
-    // Utility function to clean text
-    const cleanText = (text) => {
-        // Remove honorifics and content within parentheses
-        let cleanedText = text
-            .replace(/\b(Dr|Mr|Ms|Mrs|Miss|Professor)\.?\s+/gi, "")
-            .replace(/\(.*?\)/g, "")
-            .trim();
-        // Additional cleaning for extra spaces within names
-        cleanedText = cleanedText.replace(/\s{2,}/g, " ");
-        return cleanedText;
-    };
-
-    // Split and clean individual author names
-    const splitAndCleanAuthors = (authorsText) => {
-        return authorsText
-            .split(",")
-            .map((author) => author.trim()) // Trim each author name
-            .filter(Boolean); // Remove any empty strings resulting from split
-    };
-
-    // Extract, clean, and process the author information
-    let contributingAuthorsText = findDataByText("Contributing Author");
-    let correspondingAuthorText = findDataByText("Corresponding Author");
-
-    contributingAuthorsText = cleanText(contributingAuthorsText);
-    correspondingAuthorText = cleanText(correspondingAuthorText);
-
-    const contributingAuthors = splitAndCleanAuthors(contributingAuthorsText);
-    const correspondingAuthor = splitAndCleanAuthors(correspondingAuthorText);
-
-    // Combine and deduplicate author names
-    const allAuthorsSet = new Set([
-        ...contributingAuthors,
-        ...correspondingAuthor
-    ]);
-    const authors = Array.from(allAuthorsSet).join(", ");
-
-    // Logging or further processing
-    console.log({
-        title: findDataByText("Title"),
-        abstract: findDataByText("Abstract"),
-        authors
-    });
-    reviewerFinder(
-        findDataByText("Title"),
-        authors,
-        findDataByText("Abstract")
-    );
-    reviewerFinderPopup();
-}
 
 // Construct a reviewer list popup after clicking Rev Finder button
 function reviewerFinderPopup() {
@@ -307,29 +239,6 @@ async function addToShortList(fullName, lastName, email, inst) {
     }
 }
 
-// Send a message to open a new RF tab
-function reviewerFinder(title, authors, abstract, MTSid) {
-    chrome.runtime.sendMessage({
-        action: "openReviewerFinder",
-        data: { title, authors, abstract, MTSid }
-    });
-}
-
-// Listen to bg message with rev details, add them to shortlist in popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "reviewerDetails") {
-        const { firstName, lastName, inst, email, uniqueId } = message.data;
-        const senderTabId = message.senderTabId;
-        console.log("received in mts", message.data);
-        addToShortList(firstName, lastName, email, inst);
-        chrome.runtime.sendMessage({
-            action: "reviewerAssignmentComplete",
-            status: "success",
-            uniqueId: uniqueId, // Include the uniqueId in the response
-            tabId: senderTabId // Include the sender tab ID if not already tracked
-        });
-    }
-});
 
 // Submits the forms via POST that actually assign revs on eJP
 async function submitFormAssign(firstName, lastName, email, inst) {
@@ -396,35 +305,6 @@ async function submitFormAssign(firstName, lastName, email, inst) {
     } catch (error) {
         console.error("Error in fetch operation:", error);
     }
-}
-
-$(document).ready(function () {
-    // Check if the specific element exists
-    if ($("#nf_assign_rev").length > 0) {
-        console.log("Rev Finder button");
-        // HTML for the Reviewer Finder button
-        var reviewerFinderButtonHTML = '<button id="reviewerFinderBtn" class="mb-2" title="Reviewer Finder">🔎 Reviewer Finder</button>';
-
-        // Append the Reviewer Finder button to the existing top bar
-        $("#nf_assign_rev").prepend(reviewerFinderButtonHTML);
-        // Blink the button 5 times
-        blinkButton("#reviewerFinderBtn", 5);
-
-        // Add click event listener for the Reviewer Finder button
-        $("#reviewerFinderBtn").click(function () {
-            sendEvent('rfinitiated', '1').catch(console.error);
-            initiateRevFinding();
-        });
-    }
-});
-
-function loadRobotoFont() {
-    // Create a <link> element to import the Roboto font from Google Fonts
-    var linkElement = document.createElement("link");
-    linkElement.href =
-        "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap";
-    linkElement.rel = "stylesheet";
-    document.head.appendChild(linkElement);
 }
 
 const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';

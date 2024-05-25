@@ -117,17 +117,9 @@ body > table:nth-of-type(2)
     height: 15px;
     /* Height of the spinner, equal to width for a circle */
     animation: spin 2s linear infinite;
-    /* Adjust animation as needed */
-    display: inline-block;
-    /* Adjust display as needed, depending on layout */
+    margin-bottom: 20px;
 }
 
-.top-bar .spinner {
-    vertical-align: middle;
-    flex: 0 0 auto;
-    /* Prevents the spinner from growing or shrinking */
-
-}
 
 @keyframes spin {
     0% {
@@ -379,32 +371,4 @@ ul {
 
 .loader:nth-child(9) {
     animation-delay: 1800ms;
-}
-
-
-
-
-
-
-@keyframes blinkBoxShadow {
-
-    0%,
-    100% {
-        box-shadow: none;
-    }
-
-    50% {
-        box-shadow: 0 0 8px 3px rgb(217, 148, 160);
-
-    }
-}
-
-.blink {
-    animation-name: blinkBoxShadow;
-    animation-duration: 0.6s;
-    /* Apply ease-in-out to make the transition smoother */
-    animation-timing-function: ease-in-out;
-    /* Ensure that the animation count is set in JavaScript */
-    animation-iteration-count: 10;
-    /* This will be controlled by JavaScript */
 }

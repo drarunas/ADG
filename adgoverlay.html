@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay Content</title>
+    <style>
+        .adgoverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            box-sizing: border-box;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+        
+        .overlay-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-height: 95%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 5px;
+        }
+        .result-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .result-item label {
+            font-weight: bold;
+        }
+        .result-item .array-item,
+        .result-item .object-item {
+            margin-left: 20px;
+        }
+        .raw-json {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .expander {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#reviewerRecommenderTab" data-bs-toggle="tab">Reviewer Recommender</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#advancedSearchTab" data-bs-toggle="tab">Advanced Search</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#coiCheckTab" data-bs-toggle="tab">COI Check</a>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4">
+            <div class="tab-pane fade show active" id="reviewerRecommenderTab">
+                <h1 class="text-center">Reviewer Recommender</h1>
+                <form id="queryForm">
+                    <div class="mb-1">
+                        
+                    </div>
+
+                    <div class="card mb-1" id="msmetadata">
+                        <div class="card-header">
+                            <h3 id="title"></h3>
+                          </div>
+                        <div class="card-body">
+                            <p id="abstract"></p>
+                        </div>
+                        <div class="card-footer text-muted" id="coiauthors">
+
+                        </div>
+
+                    </div>
+                    <div class="mb-1">
+                        <input type="text" class="form-control" id="rev_keywords" name="rev_keywords" placeholder="Keywords (comma separated)">
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-auto mb-1">
+                            <input type="number" class="form-control" id="pub5_min" name="pub5_min" placeholder="Pub5 Min">
+                        </div>
+                        <div class="col-auto mb-1">
+                            <input type="number" class="form-control" id="pub10_min" name="pub10_min" placeholder="Pub10 Min">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="country" name="country" placeholder="Country (comma separated)">
+                        </div>
+                        <div class="col-md-6 mb-1 w-25">
+                            <input type="number" class="form-control" id="nresults" name="n" placeholder="n results" value="20" hidden>
+                        </div>
+                        <div class="col-md-6 mb-1 w-25">
+                            <input type="number" class="form-control" id="oresults" name="o" placeholder="offset" value="0" hidden>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <div id="reviewer_results" class="mt-4">   </div>
+            </div>
+
+
+
+
+
+            <div class="tab-pane fade" id="advancedSearchTab">
+                <h1 class="text-center">Advanced Search</h1>
+                
+                <form id="advancedSearchForm">
+                    <div class="mb-1">
+                        <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Full Name">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name">
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="orcid" name="orcid" placeholder="ORCID">
+                        </div>
+                    </div>
+                    <div class="mb-1">
+                        <input type="text" class="form-control" id="keywords" name="keywords" placeholder="Keywords (comma separated)">
+                    </div>
+                    <div class="mb-1">
+                        <input type="text" class="form-control" id="person_id" name="person_id" placeholder="Person ID">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="country" name="country" placeholder="Country">
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" id="organization" name="organization" placeholder="Organization">
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-auto mb-1">
+                            <input type="number" class="form-control" id="pub5_min" name="pub5_min" placeholder="Pub5 Min">
+                        </div>
+                        <div class="col-auto mb-1">
+                            <input type="number" class="form-control" id="pub10_min" name="pub10_min" placeholder="Pub10 Min">
+                        </div>
+                        <div class="form-check col-auto mb-1">
+                            <input type="checkbox" class="form-check-input" id="email_present" name="email_present" checked>
+                            <label class="form-check-label" for="email_present">Email Present</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <div id="adv_search_results" class="mt-4"></div>
+            </div>
+
+
+
+
+
+
+            <div class="tab-pane fade" id="coiCheckTab">
+                <h1 class="text-center">Advanced COI Check</h1>
+    
+                <form id="COI_Form">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="person_ids" name="person_ids" placeholder="Person Ids (comma separated)"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="authors">Authors (formatted)</label>
+                        <textarea class="form-control" id="coi_authors" name="coi_authors" placeholder="(first name) {last name} [email] #orcid# , ..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                </form>
+                <div id="coi_results" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
