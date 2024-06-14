@@ -1,4 +1,3 @@
-
 function showResultsPopup(data) {
     // Check if a modal already exists, if so, remove it
     const existingModal = document.getElementById('resultsModal');
@@ -307,37 +306,5 @@ async function submitFormAssign(firstName, lastName, email, inst) {
     }
 }
 
-const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
-const MEASUREMENT_ID = `G-3ZRV844YEE`;
-const API_SECRET = `fXY6muchQf6nomHF4aTutA`;
-const SESSION_EXPIRATION_IN_MIN = 30;
-const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;
 
-async function sendEvent(eventname, eventid) {
-    chrome.runtime.sendMessage({ action: "getOrCreateClientId" }, response => {
-        const clientId = response.clientId;
-        chrome.runtime.sendMessage({ action: "getOrCreateSessionId" }, response => {
-            const sessionId = response.sessionId;
-            
-            fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {
-                method: "POST",
-                body: JSON.stringify({
-                    client_id: clientId,
-                    events: [{
-                        name: eventname,
-                        params: {
-                            session_id: sessionId,
-                            engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
-                            id: eventid,
-                            hostname: window.location.href
-                        },
-                    }],
-                }),
-            }).then(data => {
-                console.log('Event sent successfully', eventname, data);
-            }).catch(console.error);
-        });
-    });
-}
 
-sendEvent('page_ext_loaded', '0').catch(console.error);

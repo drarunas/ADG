@@ -42,7 +42,6 @@ $(document).ready(function () {
         $("#nf_assign_rev").prepend(reviewerFinderButtonHTML);
 
         $("#reviewerFinderBtn").click(async function () {
-            sendEvent('rfinitiated', '1').catch(console.error); // Google Analytics
             await showOverlay();
         });
     }
@@ -94,200 +93,210 @@ function submitEvent() {
 
     $('#reviewer_results').empty();
 
-        const spinner = `
+    const spinner = `
     <div class="d-flex justify-content-center my-3 text-primary" id="loading-spinner">
         <div class="spinner-grow" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 `;
-        $('#reviewer_results').prepend(spinner);
+    $('#reviewer_results').prepend(spinner);
 
-        // Extracting author information
-        const authorsContainer = document.getElementById('coiauthors');
-        const authorElements = authorsContainer.getElementsByClassName('msauthor');
+    // Extracting author information
+    const authorsContainer = document.getElementById('coiauthors');
+    const authorElements = authorsContainer.getElementsByClassName('msauthor');
 
-        const coiauthors = Array.from(authorElements).map(authorElement => {
-            const text = authorElement.textContent.trim();
-            const match = text.match(/^(.+?) \((.+?)\)$/);
+    const coiauthors = Array.from(authorElements).map(authorElement => {
+        const text = authorElement.textContent.trim();
+        const match = text.match(/^(.+?) \((.+?)\)$/);
 
-            if (match) {
-                const [_, fullName, email] = match;
-                const nameParts = fullName.split(' ');
-                const lastName = nameParts.pop();
-                const firstName = nameParts.join(' ');
+        if (match) {
+            const [_, fullName, email] = match;
+            const nameParts = fullName.split(' ');
+            const lastName = nameParts.pop();
+            const firstName = nameParts.join(' ');
 
-                return {
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: email
-                };
-            }
-
-            return null;
-        }).filter(author => author !== null);
-
-        const formData = {
-            t: document.getElementById('title').textContent.trim(),
-            ab: document.getElementById('abstract').textContent.trim(),
-            k: document.getElementById('rev_keywords').value.split(',').map(kw => kw.trim()).filter(kw => kw),
-            country: document.getElementById('country').value.split(',').map(kw => kw.trim()).filter(kw => kw),
-            pub5_min: document.getElementById('pub5_min').value.trim(),
-            pub10_min: document.getElementById('pub10_min').value.trim(),
-            coi_authors: coiauthors,
-            person_subset_id: 23,
-            person_subset_invert: 'True',
-            n: document.getElementById('nresults').value.trim(),
-            o: document.getElementById('oresults').value.trim(),
-            add_counts_to_keywords: 'True',
-            max_number_of_keywords: 20
+            return {
+                first_name: firstName,
+                last_name: lastName,
+                email: email
+            };
         }
 
-        // Filter out empty fields
-        const filteredFormData = {};
-        for (const key in formData) {
-            if (formData[key] !== null && formData[key] !== '' && formData[key] !== undefined) {
-                if (Array.isArray(formData[key])) {
-                    if (formData[key].length > 0) {
-                        filteredFormData[key] = formData[key];
-                    }
-                } else {
+        return null;
+    }).filter(author => author !== null);
+
+    const formData = {
+        t: document.getElementById('title').textContent.trim(),
+        ab: document.getElementById('abstract').textContent.trim(),
+        k: document.getElementById('rev_keywords').value.split(',').map(kw => kw.trim()).filter(kw => kw),
+        country: document.getElementById('country').value.split(',').map(kw => kw.trim()).filter(kw => kw),
+        pub5_min: document.getElementById('pub5_min').value.trim(),
+        pub10_min: document.getElementById('pub10_min').value.trim(),
+        coi_authors: coiauthors,
+        person_subset_id: 23,
+        person_subset_invert: 'True',
+        n: document.getElementById('nresults').value.trim(),
+        o: document.getElementById('oresults').value.trim(),
+        add_counts_to_keywords: 'True',
+        max_number_of_keywords: 20
+    }
+
+    // Filter out empty fields
+    const filteredFormData = {};
+    for (const key in formData) {
+        if (formData[key] !== null && formData[key] !== '' && formData[key] !== undefined) {
+            if (Array.isArray(formData[key])) {
+                if (formData[key].length > 0) {
                     filteredFormData[key] = formData[key];
                 }
+            } else {
+                filteredFormData[key] = formData[key];
             }
         }
-        console.log(filteredFormData);
+    }
+    console.log(filteredFormData);
 
-        fetch('https://calm-retreat-38808-188b35344d25.herokuapp.com/query', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(filteredFormData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                const resultsContainer = document.getElementById('reviewer_results');
-                resultsContainer.innerHTML = '';  // Clear previous results
-                console.log(data)
-                data.forEach((item, index) => {
-                    const resultItem = document.createElement('div');
-                    resultItem.className = 'result-item';
-                    resultItem.id = `result-item-${index}`;
+    fetch('https://calm-retreat-38808-188b35344d25.herokuapp.com/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filteredFormData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('reviewer_results');
+            resultsContainer.innerHTML = '';  // Clear previous results
+            console.log(data)
+            data.forEach((item, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.id = `result-item-${index}`;
 
-                    // First name, Last name, Email, ORCID number
-                    const name = document.createElement('div');
-                    name.innerHTML = `
+                // First name, Last name, Email, ORCID number
+                const name = document.createElement('div');
+                name.innerHTML = `
                         <span class="h2">${item.first_name} ${item.last_name}<span class='badge bg-success h3 m-2'>${item.score}</span> </span>
                     `;
-                    resultItem.appendChild(name);
-                    //email and orcid 
-                    // Create a new div or span for email and ORCID IDs
-                    const EmailOrcid = document.createElement('div');
-                    // Check if orcid_ids is not null and has any IDs
-                    let orcidLinks = item.orcid_ids && item.orcid_ids.length > 0
-                        ? item.orcid_ids.map(id => `<a href="https://orcid.org/${id}" target="_blank">${id}</a>`).join(', ')
-                        : '';
+                resultItem.appendChild(name);
+                //email and orcid 
+                // Create a new div or span for email and ORCID IDs
+                const EmailOrcid = document.createElement('div');
+                // Check if orcid_ids is not null and has any IDs
+                let orcidLinks = item.orcid_ids && item.orcid_ids.length > 0
+                    ? item.orcid_ids.map(id => `<a href="https://orcid.org/${id}" target="_blank">${id}</a>`).join(', ')
+                    : '';
 
-                    // Set the innerHTML with a conditional check for orcidLinks
-                    EmailOrcid.innerHTML = `
+                // Set the innerHTML with a conditional check for orcidLinks
+                EmailOrcid.innerHTML = `
         <a href="mailto:${item.email}">${item.email}</a>
         ${orcidLinks ? ', ' + orcidLinks : ''}
     `;
 
-                    // Append EmailOrcid to the desired parent element
-                    resultItem.appendChild(EmailOrcid);
+                // Append EmailOrcid to the desired parent element
+                resultItem.appendChild(EmailOrcid);
 
-                    // Institution, Country
-                    const institutionCountry = document.createElement('div');
-                    institutionCountry.innerHTML = `
+                // Institution, Country
+                const institutionCountry = document.createElement('div');
+                institutionCountry.innerHTML = `
                         <a href="${item.ror_id}" target="_blank">${item.organization}</a>, ${item.country}
                     `;
-                    resultItem.appendChild(institutionCountry);
+                resultItem.appendChild(institutionCountry);
 
-                    const personIdDiv = document.createElement('div'); // New div for Person ID
-                    const personIdLink = document.createElement('a');
-                    personIdLink.href = `https://reviewerfinder.nature.com/person/${item.person_id}`;
-                    personIdLink.target = "_blank";
-                    personIdLink.textContent = item.person_id;
-                    personIdDiv.appendChild(personIdLink); // Append link to the new div
-                    resultItem.appendChild(personIdDiv); // Append the new div to the result item
+                const personIdDiv = document.createElement('div'); // New div for Person ID
+                const personIdLink = document.createElement('a');
+                personIdLink.href = `https://reviewerfinder.nature.com/person/${item.person_id}`;
+                personIdLink.target = "_blank";
+                personIdLink.textContent = item.person_id;
+                personIdDiv.appendChild(personIdLink); // Append link to the new div
+                resultItem.appendChild(personIdDiv); // Append the new div to the result item
 
-                    // Separator
-                    const separator = document.createElement('hr');
-                    resultItem.appendChild(separator);
+                // Separator
+                const separator = document.createElement('hr');
+                resultItem.appendChild(separator);
 
-                    // Keywords
-                    const keywordsCard = document.createElement('div'); // Create a new div for the keywords card
-                    keywordsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
-                    const keywordsCardBody = document.createElement('div'); // Create the card body
-                    keywordsCardBody.className = 'card-body';
-                    const keywordsCardTitle = document.createElement('h5'); // Create the card title
-                    keywordsCardTitle.className = 'card-title';
-                    keywordsCardTitle.textContent = 'Keywords';
-                    const formattedKeywords = item.keywords.slice(0, 100).map(keyword => {
-                        return `${keyword[0]} (${keyword[1]})`;
-                    }).join(', ');
-                    const keywordsText = document.createElement('p'); // Create the keywords text
-                    keywordsText.className = 'card-text';
-                    keywordsText.textContent = formattedKeywords;
+                // Keywords
+                const keywordsCard = document.createElement('div'); // Create a new div for the keywords card
+                keywordsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
+                const keywordsCardBody = document.createElement('div'); // Create the card body
+                keywordsCardBody.className = 'card-body';
+                const keywordsCardTitle = document.createElement('h5'); // Create the card title
+                keywordsCardTitle.className = 'card-title';
+                keywordsCardTitle.textContent = 'Keywords';
+                const formattedKeywords = item.keywords.slice(0, 100).map(keyword => {
+                    return `${keyword[0]} (${keyword[1]})`;
+                }).join(', ');
+                const keywordsText = document.createElement('p'); // Create the keywords text
+                keywordsText.className = 'card-text';
+                keywordsText.textContent = formattedKeywords;
 
-                    keywordsCardBody.appendChild(keywordsCardTitle); // Append title to card body
-                    keywordsCardBody.appendChild(keywordsText); // Append keywords text to card body
-                    keywordsCard.appendChild(keywordsCardBody); // Append card body to card
-                    resultItem.appendChild(keywordsCard); // Append card to result item
+                keywordsCardBody.appendChild(keywordsCardTitle); // Append title to card body
+                keywordsCardBody.appendChild(keywordsText); // Append keywords text to card body
+                keywordsCard.appendChild(keywordsCardBody); // Append card body to card
+                resultItem.appendChild(keywordsCard); // Append card to result item
 
 
-                    // Publications, h-index, total citations
-                    const statsCard = document.createElement('div'); // Create a new div for the stats card
-                    statsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
-                    const statsCardBody = document.createElement('div'); // Create the card body
-                    statsCardBody.className = 'card-body';
-                    const statsRow = document.createElement('div'); // Create a row for publication stats
-                    statsRow.className = 'row text-center'; // Center-align text for better display
+                // Publications, h-index, total citations
+                const statsCard = document.createElement('div'); // Create a new div for the stats card
+                statsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
+                const statsCardBody = document.createElement('div'); // Create the card body
+                statsCardBody.className = 'card-body';
+                const statsRow = document.createElement('div'); // Create a row for publication stats
+                statsRow.className = 'row text-center'; // Center-align text for better display
 
-                    const pubStats5 = document.createElement('div'); // Create a column for publications in last 5 years
-                    pubStats5.className = 'col-md-4';
-                    pubStats5.innerHTML = `
+                const pubStats5 = document.createElement('div'); // Create a column for publications in last 5 years
+                pubStats5.className = 'col-md-4';
+                pubStats5.innerHTML = `
         <div class="label">Last 5 years:</div>
         <div class="number h3">${item.pub_stats[5]}</div>
     `;
 
-                    const pubStats10 = document.createElement('div'); // Create a column for publications in last 10 years
-                    pubStats10.className = 'col-md-4';
-                    pubStats10.innerHTML = `
+                const pubStats10 = document.createElement('div'); // Create a column for publications in last 10 years
+                pubStats10.className = 'col-md-4';
+                pubStats10.innerHTML = `
         <div class="label">Last 10 years:</div>
         <div class="number h3">${item.pub_stats[10]}</div>
     `;
 
-                    const hIndex = document.createElement('div'); // Create a column for h-index
-                    hIndex.className = 'col-md-4';
-                    hIndex.innerHTML = `
+                const hIndex = document.createElement('div'); // Create a column for h-index
+                hIndex.className = 'col-md-4';
+                hIndex.innerHTML = `
         <div class="label">H-index:</div>
         <div class="number h3">${item.h_index}</div>
     `;
 
-                    statsRow.appendChild(pubStats5);
-                    statsRow.appendChild(pubStats10);
-                    statsRow.appendChild(hIndex);
+                statsRow.appendChild(pubStats5);
+                statsRow.appendChild(pubStats10);
+                statsRow.appendChild(hIndex);
 
-                    statsCardBody.appendChild(statsRow); // Append publication stats row to card body
-                    statsCard.appendChild(statsCardBody); // Append card body to card
-                    resultItem.appendChild(statsCard); // Append card to result item
+                statsCardBody.appendChild(statsRow); // Append publication stats row to card body
+                statsCard.appendChild(statsCardBody); // Append card body to card
+                resultItem.appendChild(statsCard); // Append card to result item
 
-                    resultsContainer.appendChild(resultItem);
+                resultsContainer.appendChild(resultItem);
 
-                    // Fetch additional data for each person
-                    fetchAdditionalData(formData.t, formData.ab, item.person_id, index);
-                    fetchPubData(item.person_id, index);
-                });
-                addPaginationButtons();
-                $('#loading-spinner').remove();
-
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                // Fetch additional data for each person
+                fetchAdditionalData(formData.t, formData.ab, item.person_id, index);
+                fetchPubData(item.person_id, index);
             });
+            addPaginationButtons();
+          //scroll into view
+          const firstResultItem = document.querySelector('.nav-bar');
+          const overlayContent = document.querySelector('.overlay-content');
+          if (firstResultItem && overlayContent) {
+              const firstResultItemTop = firstResultItem.offsetTop;
+              overlayContent.scrollTo({
+                  top: firstResultItemTop,
+                  behavior: 'smooth'
+              });
+          }
+            $('#loading-spinner').remove();
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 
 
 }
@@ -500,54 +509,76 @@ function processDocuments(documents) {
 }
 
 function addPaginationButtons() {
+
+    const navBarHtml = `
+    <div class="nav-bar">
+      <button class="nav-button prev-button">Previous</button>
+      <span class="result-info">Showing results 1-20</span>
+      <button class="nav-button next-button">Next</button>
+    </div>
+  `;
+
+    // Insert this nav bar at the top of the results container
     const resultsContainer = document.getElementById('reviewer_results');
-    const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'pagination-buttons';
+    resultsContainer.insertAdjacentHTML('afterbegin', navBarHtml);
 
-    const prevButton = document.createElement('button');
-    prevButton.className = 'btn btn-secondary m-4';
-    prevButton.textContent = 'Previous';
-    prevButton.id = 'prevButton';
+    // Insert this nav bar at the bottom of the results container
+    resultsContainer.insertAdjacentHTML('beforeend', navBarHtml);
 
-    const nextButton = document.createElement('button');
-    nextButton.className = 'btn btn-secondary m-4';
-    nextButton.textContent = 'Next';
-    nextButton.id = 'nextButton';
+    // Get references to the new buttons and result info spans
+    const topPrevButton = resultsContainer.querySelector('.nav-bar .prev-button');
+    const topNextButton = resultsContainer.querySelector('.nav-bar .next-button');
+    const topResultInfo = resultsContainer.querySelector('.nav-bar .result-info');
 
-    paginationContainer.appendChild(prevButton);
-    paginationContainer.appendChild(nextButton);
-    resultsContainer.appendChild(paginationContainer);
+    const bottomPrevButton = resultsContainer.lastElementChild.querySelector('.nav-bar .prev-button');
+    const bottomNextButton = resultsContainer.lastElementChild.querySelector('.nav-bar .next-button');
+    const bottomResultInfo = resultsContainer.lastElementChild.querySelector('.nav-bar .result-info');
 
-    prevButton.addEventListener('click', function (event) {
+    function updateResultInfo(start, end) {
+        const resultInfo = `Showing results ${start}-${end}`;
+        topResultInfo.textContent = resultInfo;
+        bottomResultInfo.textContent = resultInfo;
+    }
+
+    function handlePrevButtonClick(event) {
         event.preventDefault();
         const offsetInput = document.getElementById('oresults');
         const nresults = parseInt(document.getElementById('nresults').value, 10);
         let currentOffset = parseInt(offsetInput.value, 10);
         currentOffset = Math.max(currentOffset - nresults, 0);
         offsetInput.value = currentOffset;
+        updateResultInfo(currentOffset + 1, currentOffset + nresults);
         submitEvent();
-    });
+    }
 
-    nextButton.addEventListener('click', function (event) {
+    function handleNextButtonClick(event) {
         event.preventDefault();
-        console.log('Next button clicked');
         const offsetInput = document.getElementById('oresults');
         const nresults = parseInt(document.getElementById('nresults').value, 10);
         let currentOffset = parseInt(offsetInput.value, 10);
         currentOffset += nresults;
         offsetInput.value = currentOffset;
-        console.log('Offset updated to:', offsetInput.value);
+        updateResultInfo(currentOffset + 1, currentOffset + nresults);
         submitEvent();
-    });
+    }
+
+    topPrevButton.addEventListener('click', handlePrevButtonClick);
+    topNextButton.addEventListener('click', handleNextButtonClick);
+    bottomPrevButton.addEventListener('click', handlePrevButtonClick);
+    bottomNextButton.addEventListener('click', handleNextButtonClick);
 
     // Hide the Previous button if the offset is zero
     const offsetInput = document.getElementById('oresults');
     if (parseInt(offsetInput.value, 10) === 0) {
-        prevButton.style.display = 'none';
+        topPrevButton.style.display = 'none';
+        bottomPrevButton.style.display = 'none';
     } else {
-        prevButton.style.display = 'inline-block';
+        topPrevButton.style.display = 'inline-block';
+        bottomPrevButton.style.display = 'inline-block';
     }
+
+    // Initial update of the result info
+    const nresults = parseInt(document.getElementById('nresults').value, 10);
+    const currentOffset = parseInt(offsetInput.value, 10);
+    updateResultInfo(currentOffset + 1, currentOffset + nresults);
 }
-
-
-

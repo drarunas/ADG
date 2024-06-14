@@ -4,13 +4,14 @@
     "version": "0.1",
     "description": "Reviewer Recommender for eJP for editors across Nature Portfolio.",
     
+    "icons": {
+        "128": "icon.png"
+    },
+
     "content_scripts": [
         {
             "matches": [
-                "https://mts-ncomms.nature.com/*",
-                "https://mts-commspsychol.nature.com/*",
-                "https://mts-nature.nature.com/*"
-
+                "https://mts-ncomms.nature.com/*"
             ],
             "js": [
                 "jquery.js",
@@ -29,22 +30,11 @@
 
     "web_accessible_resources": [
         {
-          "resources": ["adgoverlay.html"],
-          "matches": ["<all_urls>"]
+            "resources": ["adgoverlay.html"],
+            "matches": ["https://mts-ncomms.nature.com/*"]
         }
-      ],
+    ],
 
-    "permissions": [
-        "tabs",
-        "storage",
-        "activeTab",
-        "scripting"
-    ],
-    "host_permissions": [
-        "https://mts-ncomms.nature.com/*",
-        "https://www.googletagmanager.com/*",
-        "https://www.google-analytics.com/*"
-    ],
     "background": {
         "service_worker": "background.js"
     }
