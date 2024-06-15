@@ -1,5 +1,6 @@
 function showResultsPopup(data) {
     // Check if a modal already exists, if so, remove it
+    // will not be needed in my new implementation, as the modal willalready exist and we will handle the Shortlist tab only.
     const existingModal = document.getElementById('resultsModal');
     if (existingModal) {
         existingModal.remove();
@@ -60,6 +61,7 @@ async function assignReviewer(reviewerId, jId, msId, msRevNo, msIdKey, currentSt
 // when RF button clicked -> reviewerFinderPopup reviewerFinder
 
 // Construct a reviewer list popup after clicking Rev Finder button
+//again, will not be needed int he new implementation as we will already have a shortlist in our shortlist tab
 function reviewerFinderPopup() {
     // Ensure the modal is only added once
     if ($('#reviewerFinderModal').length === 0) {
@@ -83,6 +85,7 @@ function reviewerFinderPopup() {
     }
 
     // Assign Selected button logic
+    // actualyl assigns reviewers from the shortlist, but only selected ones.
     $('#reviewerFinderModal .assignSelectedBtn').off('click').on('click', function () {
         const $popup = $('#reviewerFinderModal'); // Assuming this is your popup container
         const loaderOverlay = createLoaderOverlay(); // Ensure this function returns a jQuery object or element
@@ -143,6 +146,8 @@ function reviewerFinderPopup() {
     modalInstance.show();
 }
 
+// adds reviewers to shortlist, using names and contact details.
+// will need to be modified in the new version to only check for existing matches and list
 async function addToShortList(fullName, lastName, email, inst) {
     const $list = $("#reviewerFinderModal .popupList");
     if ($list.length === 0) {
@@ -239,7 +244,7 @@ async function addToShortList(fullName, lastName, email, inst) {
 }
 
 
-// Submits the forms via POST that actually assign revs on eJP
+// Submits the forms via POST that actually assign revs on eJP (new only?)
 async function submitFormAssign(firstName, lastName, email, inst) {
     const form = document.getElementById("nf_assign_rev");
 
@@ -305,6 +310,3 @@ async function submitFormAssign(firstName, lastName, email, inst) {
         console.error("Error in fetch operation:", error);
     }
 }
-
-
-

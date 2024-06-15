@@ -22,7 +22,9 @@
                 "recommender.js"
             ],
             "css": [
+                "overlay-styles.css",
                 "custom.css",
+                
                 "bs.css"
             ]
         }

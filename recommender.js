@@ -1,30 +1,13 @@
 // Recommender.js
-// Function to fetch email
-async function eJPGetEmail(nameHref) {
-    try {
-        const response = await fetch(nameHref);
-        if (!response.ok) throw new Error("Failed to fetch page");
+// Populates the ADG OVERLAY modal with ms details
+// Then squeries the ADG api via proxy to avoid CORRS errors 
+// Alternatively, ask ADG team to edit CORRS to allow requests from *nature.com
 
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const mailtoLink = doc.querySelector('a[href^="mailto:"]');
 
-        if (mailtoLink) {
-            const email = mailtoLink
-                .getAttribute("href")
-                .replace("mailto:", "");
-            console.log(email);
-            return email;
-        }
-        return null; // Return null if no email found
-    } catch (error) {
-        console.error("Error opening page or parsing email:", error);
-        return null; // Return null in case of error
-    }
-}
 
+// Populat MS author info (names, emails) on the ADG overlay modal
 async function populateAuthors() {
+    // getDetails is in MSDetails.js
     const details = getDetails();
     const authorsDiv = $('#coiauthors');
     authorsDiv.empty(); // Clear any existing content
@@ -38,7 +21,8 @@ async function populateAuthors() {
 
 $(document).ready(function () {
     if ($("#nf_assign_rev").length > 0) {
-        const reviewerFinderButtonHTML = '<button id="reviewerFinderBtn" class="mb-2" title="Recommender">Reviewer Recommender</button>';
+        const reviewerFinderButtonHTML = '<button id="reviewerFinderBtn" class="mb-2 btn btn-primary" title="Recommender">Reviewer Recommender</button>';
+        // Edit this to insert this above the form, not in it.
         $("#nf_assign_rev").prepend(reviewerFinderButtonHTML);
 
         $("#reviewerFinderBtn").click(async function () {
@@ -51,15 +35,7 @@ $(document).ready(function () {
 
         if (!$(`#${overlayId}`).length) {
             const overlayHTML = await fetch(chrome.runtime.getURL('adgoverlay.html')).then(response => response.text());
-            const overlayContainer = `
-                <div class="adgoverlay" id="${overlayId}">
-                    <div class="overlay-content">
-                        <button id="closeOverlay" class="close-btn">&times;</button>
-                        ${overlayHTML}
-                    </div>
-                </div>
-            `;
-            $('body').append(overlayContainer);
+            $('body').append(overlayHTML);
 
 
             $('#closeOverlay').click(function () {
@@ -73,7 +49,6 @@ $(document).ready(function () {
             });
             document.getElementById('queryForm').addEventListener('submit', function (event) {
                 event.preventDefault();
-                // set offset to 0
                 submitEvent();
             });
             const details = getDetails();
@@ -81,20 +56,20 @@ $(document).ready(function () {
             $('#title').text(details.title);
             $('#abstract').text(details.abstract);
             await populateAuthors();
+
+            setupAssignSelectedButton();
         } else {
             $(`#${overlayId}`).show();
         }
     }
 });
 
-
-
+// When the user clicks Submit button on ADG OVERLAY modal
 function submitEvent() {
 
     $('#reviewer_results').empty();
-
     const spinner = `
-    <div class="d-flex justify-content-center my-3 text-primary" id="loading-spinner">
+    <div class="d-flex justify-content-center text-primary" id="loading-spinner">
         <div class="spinner-grow" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
@@ -102,10 +77,9 @@ function submitEvent() {
 `;
     $('#reviewer_results').prepend(spinner);
 
-    // Extracting author information
+    // Author information already on the overlay
     const authorsContainer = document.getElementById('coiauthors');
     const authorElements = authorsContainer.getElementsByClassName('msauthor');
-
     const coiauthors = Array.from(authorElements).map(authorElement => {
         const text = authorElement.textContent.trim();
         const match = text.match(/^(.+?) \((.+?)\)$/);
@@ -156,7 +130,7 @@ function submitEvent() {
         }
     }
     console.log(filteredFormData);
-
+    // Fetching from my proxy app
     fetch('https://calm-retreat-38808-188b35344d25.herokuapp.com/query', {
         method: 'POST',
         headers: {
@@ -173,124 +147,90 @@ function submitEvent() {
                 const resultItem = document.createElement('div');
                 resultItem.className = 'result-item';
                 resultItem.id = `result-item-${index}`;
+                const shortlistedEmails = document.getElementById('shortlistedReviewers').getAttribute('data-shortlisted-emails').split(',');
 
                 // First name, Last name, Email, ORCID number
-                const name = document.createElement('div');
-                name.innerHTML = `
-                        <span class="h2">${item.first_name} ${item.last_name}<span class='badge bg-success h3 m-2'>${item.score}</span> </span>
-                    `;
-                resultItem.appendChild(name);
-                //email and orcid 
-                // Create a new div or span for email and ORCID IDs
-                const EmailOrcid = document.createElement('div');
-                // Check if orcid_ids is not null and has any IDs
-                let orcidLinks = item.orcid_ids && item.orcid_ids.length > 0
-                    ? item.orcid_ids.map(id => `<a href="https://orcid.org/${id}" target="_blank">${id}</a>`).join(', ')
-                    : '';
-
-                // Set the innerHTML with a conditional check for orcidLinks
-                EmailOrcid.innerHTML = `
-        <a href="mailto:${item.email}">${item.email}</a>
-        ${orcidLinks ? ', ' + orcidLinks : ''}
-    `;
-
-                // Append EmailOrcid to the desired parent element
-                resultItem.appendChild(EmailOrcid);
-
-                // Institution, Country
-                const institutionCountry = document.createElement('div');
-                institutionCountry.innerHTML = `
+                resultItem.innerHTML = `
+                    <div class="rev-name-div d-flex flex-row align-items-center justify-content-between">
+                        <span class="h2 rev-name">${item.first_name} ${item.last_name}
+                            <span class='badge bg-success h3 m-2'>${item.score}</span>
+                        </span>
+                        <button class="btn btn-primary add-to-shortlist" ${shortlistedEmails.includes(item.email) ? 'disabled' : ''}>
+                            ${shortlistedEmails.includes(item.email) ? 'Shortlisted' : '🦉Add To Shortlist'}
+                        </button>
+                    </div>
+                    <div>
+                        <a href="mailto:${item.email}">${item.email}</a>
+                        ${item.orcid_ids && item.orcid_ids.length > 0
+                        ? ', ' + item.orcid_ids.map(id => `<a href="https://orcid.org/${id}" target="_blank">${id}</a>`).join(', ')
+                        : ''}
+                    </div>
+                    <div>
                         <a href="${item.ror_id}" target="_blank">${item.organization}</a>, ${item.country}
-                    `;
-                resultItem.appendChild(institutionCountry);
+                    </div>
+                    <div>
+                        <a href="https://reviewerfinder.nature.com/person/${item.person_id}" target="_blank">${item.person_id}</a>
+                    </div>
+                    <hr>
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <h5 class="card-title">Keywords</h5>
+                            <p class="card-text">
+                                ${item.keywords.slice(0, 100).map(keyword => `${keyword[0]} (${keyword[1]})`).join(', ')}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="label">Last 5 years:</div>
+                                    <div class="number h3">${item.pub_stats[5]}</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="label">Last 10 years:</div>
+                                    <div class="number h3">${item.pub_stats[10]}</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="label">H-index:</div>
+                                    <div class="number h3">${item.h_index}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultItem.querySelector('.add-to-shortlist').addEventListener('click', function () {
+                    addToShortlist(item, this);
 
-                const personIdDiv = document.createElement('div'); // New div for Person ID
-                const personIdLink = document.createElement('a');
-                personIdLink.href = `https://reviewerfinder.nature.com/person/${item.person_id}`;
-                personIdLink.target = "_blank";
-                personIdLink.textContent = item.person_id;
-                personIdDiv.appendChild(personIdLink); // Append link to the new div
-                resultItem.appendChild(personIdDiv); // Append the new div to the result item
-
-                // Separator
-                const separator = document.createElement('hr');
-                resultItem.appendChild(separator);
-
-                // Keywords
-                const keywordsCard = document.createElement('div'); // Create a new div for the keywords card
-                keywordsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
-                const keywordsCardBody = document.createElement('div'); // Create the card body
-                keywordsCardBody.className = 'card-body';
-                const keywordsCardTitle = document.createElement('h5'); // Create the card title
-                keywordsCardTitle.className = 'card-title';
-                keywordsCardTitle.textContent = 'Keywords';
-                const formattedKeywords = item.keywords.slice(0, 100).map(keyword => {
-                    return `${keyword[0]} (${keyword[1]})`;
-                }).join(', ');
-                const keywordsText = document.createElement('p'); // Create the keywords text
-                keywordsText.className = 'card-text';
-                keywordsText.textContent = formattedKeywords;
-
-                keywordsCardBody.appendChild(keywordsCardTitle); // Append title to card body
-                keywordsCardBody.appendChild(keywordsText); // Append keywords text to card body
-                keywordsCard.appendChild(keywordsCardBody); // Append card body to card
-                resultItem.appendChild(keywordsCard); // Append card to result item
-
-
-                // Publications, h-index, total citations
-                const statsCard = document.createElement('div'); // Create a new div for the stats card
-                statsCard.className = 'card mt-2'; // Use Bootstrap card and margin-top classes
-                const statsCardBody = document.createElement('div'); // Create the card body
-                statsCardBody.className = 'card-body';
-                const statsRow = document.createElement('div'); // Create a row for publication stats
-                statsRow.className = 'row text-center'; // Center-align text for better display
-
-                const pubStats5 = document.createElement('div'); // Create a column for publications in last 5 years
-                pubStats5.className = 'col-md-4';
-                pubStats5.innerHTML = `
-        <div class="label">Last 5 years:</div>
-        <div class="number h3">${item.pub_stats[5]}</div>
-    `;
-
-                const pubStats10 = document.createElement('div'); // Create a column for publications in last 10 years
-                pubStats10.className = 'col-md-4';
-                pubStats10.innerHTML = `
-        <div class="label">Last 10 years:</div>
-        <div class="number h3">${item.pub_stats[10]}</div>
-    `;
-
-                const hIndex = document.createElement('div'); // Create a column for h-index
-                hIndex.className = 'col-md-4';
-                hIndex.innerHTML = `
-        <div class="label">H-index:</div>
-        <div class="number h3">${item.h_index}</div>
-    `;
-
-                statsRow.appendChild(pubStats5);
-                statsRow.appendChild(pubStats10);
-                statsRow.appendChild(hIndex);
-
-                statsCardBody.appendChild(statsRow); // Append publication stats row to card body
-                statsCard.appendChild(statsCardBody); // Append card body to card
-                resultItem.appendChild(statsCard); // Append card to result item
-
+                });
                 resultsContainer.appendChild(resultItem);
 
                 // Fetch additional data for each person
-                fetchAdditionalData(formData.t, formData.ab, item.person_id, index);
-                fetchPubData(item.person_id, index);
+
+                try {
+                    fetchAdditionalData(formData.t, formData.ab, item.person_id, index);
+                } catch (error) {
+                    console.error('Error fetching additional data:', error);
+                }
+
+                try {
+                    fetchPubData(item.person_id, index);
+                } catch (error) {
+                    console.error('Error fetching publication data:', error);
+                }
             });
             addPaginationButtons();
-          //scroll into view
-          const firstResultItem = document.querySelector('.nav-bar');
-          const overlayContent = document.querySelector('.overlay-content');
-          if (firstResultItem && overlayContent) {
-              const firstResultItemTop = firstResultItem.offsetTop;
-              overlayContent.scrollTo({
-                  top: firstResultItemTop,
-                  behavior: 'smooth'
-              });
-          }
+
+            // scroll into view
+            const firstResultItem = document.querySelector('.nav-bar');
+            const overlayContent = document.querySelector('.overlay-content');
+            if (firstResultItem && overlayContent) {
+                const firstResultItemTop = firstResultItem.offsetTop;
+                overlayContent.scrollTo({
+                    top: firstResultItemTop,
+                    behavior: 'smooth'
+                });
+            }
             $('#loading-spinner').remove();
 
         })
@@ -300,7 +240,7 @@ function submitEvent() {
 
 
 }
-
+// get most relevant publications
 function fetchAdditionalData(title, abstract, personId, index) {
     const endpoint = 'https://calm-retreat-38808-188b35344d25.herokuapp.com/explain';
     const params = {
@@ -335,9 +275,8 @@ function fetchAdditionalData(title, abstract, personId, index) {
                     const listItem = document.createElement('li');
                     const publication = document.createElement('div');
                     publication.innerHTML = `
-                    ${explanation.title}. 
-                    <strong>${toTitleCase(explanation.journal_title)}</strong>.
-
+                    ${explanation.title ? explanation.title : 'No title available'}. 
+                    <strong>${explanation.journal_title ? toTitleCase(explanation.journal_title) : 'NA'}</strong>.
                     ${explanation.pub_year}. 
                     Score: ${explanation.score.toFixed(2)}. 
                     <a href="https://doi.org/${explanation.doi}" target="_blank">${explanation.doi}</a>
@@ -406,7 +345,7 @@ function renderObject(obj) {
     return container;
 }
 
-
+// get author's publication history
 function fetchPubData(authorId, index) {
     fetch(`https://calm-retreat-38808-188b35344d25.herokuapp.com/person/${authorId}/documents?limit=100`, {
         method: 'GET',
@@ -582,3 +521,274 @@ function addPaginationButtons() {
     const currentOffset = parseInt(offsetInput.value, 10);
     updateResultInfo(currentOffset + 1, currentOffset + nresults);
 }
+
+async function addToShortlist(reviewer, button) {
+    const shortlistContainer = document.getElementById('shortlistedReviewers');
+    const emailLowerCase = reviewer.email.toLowerCase();
+    const middleInitialPart = reviewer.middle_initials ? ` ${reviewer.middle_initials}` : "";
+    // Create the flying element
+    // Create the flying element
+    const flyingElement = document.createElement('div');
+    flyingElement.className = 'fly-animation';
+    flyingElement.textContent = '🦉';
+    document.body.appendChild(flyingElement);
+
+    // Get button and shortlist tab link positions
+    const buttonRect = button.getBoundingClientRect();
+    const shortlistTabLink = document.getElementById('shortlistTabLink');
+    const shortlistTabRect = shortlistTabLink.getBoundingClientRect();
+
+    // Set initial position of the flying element
+    flyingElement.style.left = `${buttonRect.left + window.scrollX}px`;
+    flyingElement.style.top = `${buttonRect.top + window.scrollY}px`;
+
+
+    const translateX = (shortlistTabRect.left + shortlistTabRect.width / 2) - (buttonRect.left);
+    const translateY = (shortlistTabRect.top + shortlistTabRect.height / 2) - (buttonRect.top);
+    // Set custom properties for the animation
+    flyingElement.style.setProperty('--translate-x', `${translateX}px`);
+    flyingElement.style.setProperty('--translate-y', `${translateY}px`);
+
+    // Trigger reflow to restart the animation
+    flyingElement.offsetWidth;
+
+    // Wait for animation to end
+    setTimeout(() => {
+        flyingElement.remove();
+    }, 600);
+
+
+    const reviewerDetails = `
+    <div class="shortlist-rev-card mb-2">
+        
+            <div class="main-shortlisted-rev">
+                <input type="checkbox" class="form-check-input pcheck" value="${emailLowerCase}" data-status="new" data-fname="${reviewer.first_name}" data-lname="${reviewer.last_name}" data-email="${emailLowerCase}" data-inst="${reviewer.organization}">
+        <span>🦉${reviewer.first_name}${middleInitialPart} ${reviewer.last_name}, 📧${emailLowerCase}, ${reviewer.organization}</span>
+                </div>
+            <div class="ejp-matches-div" id="matches-${emailLowerCase.replace(/[@.]/g, '')}">
+            </div>
+
+    </div>
+    `;
+    shortlistContainer.insertAdjacentHTML('beforeend', reviewerDetails);
+
+    // Disable the button and change its text
+    button.disabled = true;
+    button.textContent = 'Shortlisted';
+
+    // Update the data-shortlisted-emails attribute
+    const shortlistedEmails = shortlistContainer.getAttribute('data-shortlisted-emails').split(',').filter(email => email);
+    shortlistedEmails.push(reviewer.email);
+    shortlistContainer.setAttribute('data-shortlisted-emails', shortlistedEmails.join(','));
+
+    // Check for matches on the system and update the matches div
+    await checkForMatches(reviewer.first_name, reviewer.last_name, reviewer.email, reviewer.organization, `matches-${emailLowerCase.replace(/[@.]/g, '')}`);
+}
+
+async function checkForMatches(firstName, lastName, email, inst, matchesDivId) {
+    const matchesDiv = document.getElementById(matchesDivId);
+    const spinnerId = `matches-spinner-${matchesDivId}`;
+    const $spinner = $(`
+        <div class="d-flex justify-content-left text-primary" id="${spinnerId}">
+            <div class="spinner-grow  matches-spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `);
+    $(matchesDiv).prepend($spinner);
+
+    try {
+        const form = document.getElementById("nf_assign_rev");
+        const { formType, jId, msId, msRevNo, msIdKey, ndt, currentStageId, desiredRevCnt } = getPageParams(form);
+
+        const searchData = await eJPPersonSearch(firstName, lastName, "", "", jId, msId, msRevNo, msIdKey, currentStageId, desiredRevCnt) || [];
+        const searchDataByEmail = await eJPPersonSearch("", "", email, "", jId, msId, msRevNo, msIdKey, currentStageId, desiredRevCnt) || [];
+
+        if ((!searchData || searchData.length === 0) && (!searchDataByEmail || searchDataByEmail.length === 0)) {
+            matchesDiv.innerHTML = `<div class="eJPResult"><span>❌ Not on eJP</span></div>`;
+        } else {
+            if (!searchDataByEmail || searchDataByEmail.length === 0) {
+                matchesDiv.innerHTML += `<div class="eJPResult"><span>❌ Email not on eJP</span></div>`;
+            }
+
+            const combinedData = [...searchData, ...searchDataByEmail].filter(element => element !== null);
+            const uniqueCombinedData = Array.from(new Map(combinedData.map(item => [item['authId'], item])).values());
+
+            for (const dataItem of uniqueCombinedData) {
+                await appendMatchItem(matchesDiv, dataItem);
+            }
+
+        }
+        console.log("all reviewers");
+
+
+    } catch (error) {
+        console.error("Error during eJPPersonSearch:", error);
+        matchesDiv.innerHTML = "Failed to load data";
+        $(`#${spinnerId}`).remove();
+    } finally {
+        // Reorder and highlight matches after all operations are complete
+        reorderAndHighlightMatches(matchesDiv, email);
+        $(`#${spinnerId}`).remove();
+        console.log("removed");
+    }
+}
+
+async function appendMatchItem(matchesDiv, dataItem) {
+        // Fetch and display email if available
+        var fetchedEmail = '';
+        try {
+            fetchedEmail = await eJPGetEmail(dataItem.nameHref);
+
+        } catch (error) {
+            console.error("Error fetching email:", dataItem.name, error);
+        }
+
+    const matchItem = document.createElement('div');
+    matchItem.className = 'eJPResult';
+    matchItem.innerHTML = `<input type="checkbox" class="form-check-input pcheck" value="${dataItem.authId}" data-status="existing">
+        <span >
+        <a href="${dataItem.nameHref}" target="_blank">${dataItem.name}</a>, ${dataItem.organization}
+        ${dataItem.pending ? ` ❗Pending: ${dataItem.pending}` : ''}
+        ${dataItem.averageDuration ? ` 🕓${dataItem.averageDuration}` : ''}
+        ${dataItem.conflicts ? ` ${dataItem.conflicts}` : ''}
+        ${fetchedEmail ? ` 📧${fetchedEmail}` : ''}
+        </span>
+    `;
+
+    matchesDiv.appendChild(matchItem);
+
+
+}
+
+// Function to reorder and highlight matches
+function reorderAndHighlightMatches(matchesDiv, email) {
+    const emailText = `📧${email.toLowerCase()}`;
+    const alreadyAssignedText = "Already Assigned";
+    const matches = Array.from(matchesDiv.children);
+
+    matches.forEach(matchItem => {
+        const textContent = matchItem.textContent || matchItem.innerText;
+
+        if (textContent.includes(emailText)) {
+            matchItem.classList.add("matchingLi");
+            matchItem.querySelector('input[type="checkbox"]').checked = true;
+            matchesDiv.insertBefore(matchItem, matchesDiv.firstChild);
+        }
+
+        if (textContent.includes(alreadyAssignedText)) {
+            const checkbox = matchItem.querySelector('input[type="checkbox"]');
+            checkbox.checked = false;
+            checkbox.disabled = true;
+        }
+    });
+}
+
+
+function setupAssignSelectedButton() {
+    const assignSelectedBtn = document.getElementById('assignSelectedBtn');
+    if (assignSelectedBtn) {
+        assignSelectedBtn.addEventListener('click', async () => {
+            assignSelectedBtn.disabled = true;
+
+            const selectedReviewers = document.querySelectorAll('#shortlistedReviewers input[type="checkbox"]:checked');
+
+            const operationPromises = [];
+
+            selectedReviewers.forEach(checkbox => {
+                const firstName = checkbox.dataset.fname;
+                const lastName = checkbox.dataset.lname;
+                const email = checkbox.dataset.email;
+                const inst = checkbox.dataset.inst;
+                const status = checkbox.dataset.status;
+                console.log(email, status);
+                const form = document.getElementById("nf_assign_rev");
+                const { formType, jId, msId, msRevNo, msIdKey, ndt, currentStageId, desiredRevCnt } = getPageParams(form);
+                if (status === "new") {
+                    operationPromises.push(submitFormAssign(firstName, lastName, email, inst));
+                } else if (status === "existing") {
+                    const reviewerId = checkbox.value;
+                    operationPromises.push(assignReviewer(reviewerId,
+                        jId,
+                        msId,
+                        msRevNo,
+                        msIdKey,
+                        currentStageId));
+                }
+            });
+
+            await Promise.all(operationPromises)
+                .then(() => {
+                    console.log("All reviewers have been successfully assigned.");
+
+                    const hosthref = $('#nf_assign_rev').attr('action');
+                    const form = document.getElementById("nf_assign_rev");
+                    const { formType, jId, msId, msRevNo, msIdKey, ndt, currentStageId, desiredRevCnt } = getPageParams(form);
+                    window.location.href = `${hosthref}?form_type=${formType}&j_id=${jId}&ms_id=${msId}&ms_rev_no=${msRevNo}&ms_id_key=${msIdKey}&current_stage_id=${currentStageId}&show_tab=CurrentList&redirected=1&desired_rev_cnt=${desiredRevCnt}`;
+
+                })
+                .catch((error) => {
+                    console.error("An error occurred during the assignments:", error);
+                })
+                .finally(() => {
+                    assignSelectedBtn.disabled = false;
+                });
+        });
+    }
+};
+
+async function submitFormAssign(firstName, lastName, email, inst) {
+    const form = document.getElementById("nf_assign_rev");
+
+    const { formType, jId, msId, msRevNo, msIdKey, ndt, currentStageId, desiredRevCnt } = getPageParams(form);
+
+    // Constructing the request body
+    const requestBody = `form_type=${encodeURIComponent(formType)}&j_id=${encodeURIComponent(jId)}&ms_id=${encodeURIComponent(msId)}&ms_rev_no=${encodeURIComponent(msRevNo)}&ms_id_key=${encodeURIComponent(msIdKey)}&ndt=${encodeURIComponent(ndt)}&current_stage_id=${encodeURIComponent(currentStageId)}&first_nm=${encodeURIComponent(firstName)}&last_nm=${encodeURIComponent(lastName)}&org=${encodeURIComponent(inst)}&desired_rev_cnt=${encodeURIComponent(desiredRevCnt)}&email=${encodeURIComponent(email)}&action=Add+Person+Check`;
+
+    try {
+        console.log("assigning new");
+        const response = await fetchNatureData(requestBody);
+
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        // Check for the existence of a span with class "MSG"
+        const msgSpan = doc.querySelector("span.MSG");
+        const tableExists = doc.querySelector("#artv_search_results_tbl") !== null;
+
+        if (msgSpan && msgSpan.textContent.includes("Possible matching accounts found") && tableExists) {
+            const inputRadio = doc.querySelector('input[type="radio"][name="reviewer"]');
+            if (inputRadio) {
+                const reviewerId = inputRadio.value;
+                console.log("Reviewer ID:", reviewerId);
+
+                // Call assignReviewer with all necessary parameters
+                await assignReviewer(reviewerId, jId, msId, msRevNo, msIdKey, currentStageId);
+            } else {
+                console.log("No matching input element found.");
+            }
+        } else {
+            // Handle cases without matching accounts or redirection
+            // [Your existing logic for handling these cases]
+        }
+    } catch (error) {
+        console.error("Error in fetch operation:", error);
+    }
+}
+
+async function assignReviewer(reviewerId, jId, msId, msRevNo, msIdKey, currentStageId) {
+    const requestBody = `form_type=assign_rev_tab_view_store&j_id=${encodeURIComponent(jId)}&ms_id=${encodeURIComponent(msId)}&ms_rev_no=${encodeURIComponent(msRevNo)}&ms_id_key=${encodeURIComponent(msIdKey)}&current_stage_id=${encodeURIComponent(currentStageId)}&reviewer=${encodeURIComponent(reviewerId)}&action=Assign`;
+
+    try {
+        const response = await fetchNatureData(requestBody);
+        if (!response.ok) {
+            throw new Error("Network response was not ok.");
+        }
+        const data = await response.text(); // Or response.json() if the response is JSON.
+        console.log("Assignment successful");
+    } catch (error) {
+        console.error("Error during assignment:", error);
+    }
+}
+

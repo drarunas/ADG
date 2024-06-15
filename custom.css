@@ -1,26 +1,9 @@
-/* BODY * {
-    font-size: 16px !important;
-    font-weight: normal !important;
-    font-family: "Roboto", sans-serif !important;
-}
-
-.folder_table   {
-    min-width: 100% !important;
-}
-
-body > table:nth-of-type(2) 
- {
-    width: 80% !important;
-}
- */
-
 
 
 .pcheck {
     width: 15px !important;
     height: 15px !important; 
 }
-
 
 
 .popupWindow {
@@ -177,40 +160,11 @@ ul {
     /* Examples: disc, circle, square, none */
 }
 
-.eJPResults {
-    list-style-type: none;
-    /* Removes default list bullets */
-    padding-left: 0;
-    /* Removes default padding */
-    margin-top: 10px;
-    /* Adds some space above the list */
-}
-
-.eJPResults li {
-    padding: 5px;
-    /* Adds padding inside each list item */
-    margin-bottom: 10px;
-    /* Adds space between list items */
-    border-radius: 5px;
-    /* Rounds the corners of the list items */
-    display: flex;
-    /* Enables flexbox layout */
-    align-items: center;
-    /* Centers items vertically */
-    font-weight: normal;
-}
 
 
 
-.matchingLi {
-    background-color: #f4ecec;
-    border: 0px solid #bdbbb8;
-    padding: 2px;
-    /* Add some padding inside */
-    border-radius: 5px;
-    /* Optionally round the corners */
-    font-weight: normal;
-}
+
+
 
 
 
