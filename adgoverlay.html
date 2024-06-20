@@ -23,7 +23,7 @@
                 <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ RECOMMENDER TAB @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
 
                 <div class="tab-pane m-2 fade show active" id="reviewerRecommenderTab">
-                    <h1 class="text-center">Reviewer Recommender</h1>
+                    
                     <form id="queryForm">
 
                         <div class="card mb-1" id="msmetadata">
@@ -31,7 +31,8 @@
                                 <h3 id="title"></h3>
                             </div>
                             <div class="card-body">
-                                <p id="abstract"></p>
+                                <p id="abstract" class="m-0"></p>
+                                <button id="editAbstractBtn" class="btn btn-sm btn-secondary" >Edit</button>
                             </div>
                             <div class="card-footer text-muted" id="coiauthors"></div>
                         </div>
@@ -62,6 +63,10 @@
                                 <input type="number" class="form-control" id="oresults" name="o" placeholder="offset"
                                     value="0" hidden>
                             </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="flexSwitchCheckCOI" >
+                                <label class="form-check-label" for="flexSwitchCheckCOI">Hide COIs</label>
+                              </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -70,7 +75,7 @@
 
                 <!-- @@@@@@@@@@@@@@@@@@@@@@@ ADVANCED SEARCH TAB @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
                 <div class="tab-pane m-2 fade" id="advancedSearchTab">
-                    <h1 class="text-center">Advanced Search</h1>
+                   
 
                     <form id="advancedSearchForm">
                         <div class="mb-1">
@@ -113,6 +118,14 @@
                                 <input type="text" class="form-control" id="organization" name="organization"
                                     placeholder="Organization">
                             </div>
+                            <div class="col-md-6 mb-1 w-25">
+                                <input type="number" class="form-control" id="nresults" name="n" placeholder="n results"
+                                    value="18" hidden>
+                            </div>
+                            <div class="col-md-6 mb-1 w-25">
+                                <input type="number" class="form-control" id="oresults" name="o" placeholder="offset"
+                                    value="0" hidden>
+                            </div>
                         </div>
                         <div class="row align-items-center">
                             <div class="col-auto mb-1">
@@ -137,7 +150,7 @@
                 <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@ SHORTLIST TAB @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
 
                 <div class="tab-pane m-2 fade" id="shortlistTab">
-                    <h1 class="text-center">Shortlist for MSID</h1>
+                    
                     <div id="shortlistedReviewers" data-shortlisted-emails=""></div>
                     <button id="assignSelectedBtn" class="btn btn-primary mt-3">Assign Selected</button>
                 </div>

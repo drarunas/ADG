@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "ADG",
-    "version": "0.1",
-    "description": "Reviewer Recommender for eJP for editors across Nature Portfolio.",
+    "version": "0.21",
+    "description": "Reviewer Recommender for editors across Nature Portfolio using eJP.",
     
     "icons": {
         "128": "icon.png"
@@ -19,7 +19,9 @@
                 "bootstrap.min.js",
                 "contentMTS.js",
                 "MSDetails.js",
-                "recommender.js"
+                "render_results.js",
+                "recommender.js",
+                "advanced_search.js"
             ],
             "css": [
                 "overlay-styles.css",

@@ -326,3 +326,12 @@ ul {
 .loader:nth-child(9) {
     animation-delay: 1800ms;
 }
+
+
+
+#editAbstractBtn {
+    border-radius: 10px;
+    font-size: 0.5rem;
+    margin: 0;
+    
+}
