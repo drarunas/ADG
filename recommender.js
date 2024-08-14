@@ -22,8 +22,13 @@ async function populateAuthors() {
 $(document).ready(function () {
     if ($("#nf_assign_rev").length > 0) {
         const reviewerFinderButtonHTML = '<button id="reviewerFinderBtn" class="mb-2 btn btn-primary" title="Recommender">Reviewer Recommender</button>';
-        // Edit this to insert this above the form, not in it.
+        
         $("#nf_assign_rev").before(reviewerFinderButtonHTML);
+
+        const ECR_url = '<div><button class="mb-2 btn link-btn btn-sm btn-primary" onclick="window.open(\'https://docs.google.com/spreadsheets/d/1WhTsRvd_nXDEK2AT0QPJu7Zf7KQFVkYo/edit?gid=1021598913#gid=1021598913\', \'_blank\')">ECR Reviewer Database</button></div>';
+        $("#nf_assign_rev").before(ECR_url);
+        
+        
 
 
         $("#reviewerFinderBtn").click(async function () {
