@@ -128,7 +128,7 @@ async function render_results(data, container, form, signal) {
 
 // get most relevant publications
 async function fetchAdditionalData(title, abstract, personId, index, container, signal) {
-    const endpoint = 'https://calm-retreat-38808-188b35344d25.herokuapp.com/explain';
+    const endpoint = 'https://rev-app.public.springernature.app/explain';
     const params = {
         title: title,
         abstract: abstract,
@@ -196,7 +196,7 @@ async function fetchAdditionalData(title, abstract, personId, index, container, 
 
 // get author's publication history
 async function fetchPubData(authorId, index, container, signal) {
-    return fetch(`https://calm-retreat-38808-188b35344d25.herokuapp.com/person/${authorId}/documents?limit=100`, {
+    return fetch(`https://rev-app.public.springernature.app/person/${authorId}/documents?limit=100`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

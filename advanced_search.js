@@ -87,7 +87,7 @@ function advSearchSubmitEvent() {
         }
     }
    
-    fetch('https://calm-retreat-38808-188b35344d25.herokuapp.com/advanced_search', {
+    fetch('https://rev-app.public.springernature.app/advanced_search', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

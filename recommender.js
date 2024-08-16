@@ -22,7 +22,7 @@ async function populateAuthors() {
 $(document).ready(function () {
     if ($("#nf_assign_rev").length > 0) {
         const reviewerFinderButtonHTML = '<button id="reviewerFinderBtn" class="mb-2 btn btn-primary" title="Recommender">Reviewer Recommender</button>';
-        
+ 
         $("#nf_assign_rev").before(reviewerFinderButtonHTML);
 
         const ECR_url = '<div><button class="mb-2 btn link-btn btn-sm btn-primary" onclick="window.open(\'https://docs.google.com/spreadsheets/d/1WhTsRvd_nXDEK2AT0QPJu7Zf7KQFVkYo/edit?gid=1021598913#gid=1021598913\', \'_blank\')">ECR Reviewer Database</button></div>';
@@ -169,7 +169,7 @@ function submitEvent() {
     }
 
     // Fetching from my proxy app
-    fetch('https://calm-retreat-38808-188b35344d25.herokuapp.com/query', {
+    fetch('https://rev-app.public.springernature.app/query', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
